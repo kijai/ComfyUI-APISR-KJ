@@ -6,6 +6,7 @@ from .architecture.rrdb import RRDBNet
 from .architecture.grl import GRL
 import comfy.model_management as mm
 import comfy.utils
+from contextlib import nullcontext
 
 def convert_dtype(dtype_str):
     if dtype_str == 'fp32':
@@ -174,13 +175,15 @@ class APISR_upscale:
         self.model.to(device)
         pbar = comfy.utils.ProgressBar(B)
         t = []
-        for start_idx in range(0, B, per_batch):
-            sub_images = self.model(images[start_idx:start_idx+per_batch])
-            t.append(sub_images.cpu())
-            # Calculate the number of images processed in this batch
-            batch_count = sub_images.shape[0]
-            # Update the progress bar by the number of images processed in this batch
-            pbar.update(batch_count)
+        autocast_condition = not comfy.model_management.is_device_mps(device)
+        with torch.autocast(comfy.model_management.get_autocast_device(device), dtype=dtype) if autocast_condition else nullcontext():
+            for start_idx in range(0, B, per_batch):
+                sub_images = self.model(images[start_idx:start_idx+per_batch])
+                t.append(sub_images.cpu())
+                # Calculate the number of images processed in this batch
+                batch_count = sub_images.shape[0]
+                # Update the progress bar by the number of images processed in this batch
+                pbar.update(batch_count)
         self.model.cpu()
         
         t = torch.cat(t, dim=0).permute(0, 2, 3, 1).cpu().to(torch.float32)
