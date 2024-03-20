@@ -8,6 +8,8 @@ import comfy.model_management as mm
 import comfy.utils
 from contextlib import nullcontext
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 def convert_dtype(dtype_str):
     if dtype_str == 'fp32':
         return torch.float32
@@ -28,7 +30,7 @@ def load_rrdb(generator_weight_PATH, scale, print_options=False):
     '''  
 
     # Load the checkpoint
-    checkpoint_g = torch.load(generator_weight_PATH)
+    checkpoint_g = torch.load(generator_weight_PATH, map_location=torch.device(device))
 
     # Find the generator weight
     if 'params_ema' in checkpoint_g:
@@ -82,7 +84,7 @@ def load_grl(generator_weight_PATH, scale=4):
     '''
 
     # Load the checkpoint
-    checkpoint_g = torch.load(generator_weight_PATH)
+    checkpoint_g = torch.load(generator_weight_PATH, map_location=torch.device(device))
 
      # Find the generator weight
     if 'model_state_dict' in checkpoint_g:
