@@ -148,6 +148,7 @@ class APISR_upscale:
 
     def upscale(self, ckpt_name, dtype, images, per_batch):
         device = mm.get_torch_device()
+        offload_device = mm.unet_offload_device()
         model_path = folder_paths.get_full_path("upscale_models", ckpt_name)
         custom_config = {
             'dtype': dtype,
@@ -170,7 +171,7 @@ class APISR_upscale:
         W = (W // 8) * 8
 
         if images.shape[2] != H or images.shape[3] != W:
-            images = F.interpolate(images, size=(H, W), mode="bicubic")
+            images = F.interpolate(images, size=(H, W), mode="bilinear")
         images = images.to(device = device, dtype = dtype)
         self.model.to(device)
         pbar = comfy.utils.ProgressBar(B)
@@ -184,7 +185,7 @@ class APISR_upscale:
                 batch_count = sub_images.shape[0]
                 # Update the progress bar by the number of images processed in this batch
                 pbar.update(batch_count)
-        self.model.cpu()
+        self.model.to(offload_device)
         
         t = torch.cat(t, dim=0).permute(0, 2, 3, 1).cpu().to(torch.float32)
         
