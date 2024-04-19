@@ -144,7 +144,7 @@ class APISR_upscale:
     RETURN_TYPES = ("IMAGE", )
     RETURN_NAMES = ("images", )
     FUNCTION = "upscale"
-    CATEGORY = "ASPIR"
+    CATEGORY = "APISR-KJ"
 
     def upscale(self, ckpt_name, dtype, images, per_batch):
         device = mm.get_torch_device()
