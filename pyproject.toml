@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-apisr-kj"
-description = ""
+description = "Node to use [a/APISR](https://github.com/Kiteretsu77/APISR) upscale models in ComfyUI.[w/NOTE: repo name is changed from ComfyUI-APISR -> ComfyUI-APISR-KJ]"
 version = "1.0.0"
 license = "LICENSE"
 dependencies = ["numpy", "scipy", "omegaconf", "timm>=0.9.7"]
